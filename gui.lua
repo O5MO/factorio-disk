@@ -45,6 +45,15 @@ local function update_gui(player)
         refs.disk_label.caption = {"diskreader-gui.label-no-disk"}
     end
 
+    if chest_stack and chest_stack.valid_for_read then
+        local disk_label = chest_stack.get_tag("disk_label") or ""
+        if #disk_label == 0 then
+            refs.disk_label.caption = {"diskreader-gui.label-no-label"}
+        else
+            refs.disk_label.caption = disk_label
+        end
+    end
+
     -- fields in reader are already fresh because they ticked first before the gui update
     refs.read_signal.elem_value = reader.read_signal
     refs.write_signal.elem_value = reader.write_signal
@@ -213,14 +222,18 @@ function gui.open(reader, player)
                     },
                     {
                         args = {type = "flow"},
+                        style_mods = {vertical_align = "center"},
                         {
                             args = {type = "label", style = "subheader_semibold_label", name = "disk_label", caption = {"diskreader-gui.label-no-label"}},
                         },
-                        --[[
                         {
-                            args = {type = "sprite-button", style = "mini_button_aligned_to_text_vertically", sprite = "utility.rename_icon"},
+                            args = {type = "textfield", name = "disk_label_textfield", icon_selector = true, visible = false},
+                            _confirmed = handlers.edit_label
                         },
-                        ]]
+                        {
+                            args = {type = "sprite-button", style = "mini_button_aligned_to_text_vertically_when_centered", sprite = "utility.rename_icon", tooltip = {"gui-edit-label.edit-label"}},
+                            _click = handlers.edit_label
+                        },
                     },
                 },
                 {
@@ -456,6 +469,36 @@ function handlers.close_description_window(event)
     local player = game.get_player(event.player_index) --[[@as LuaPlayer]]
     player.gui.screen.description_window.destroy()
     player.opened = player.gui.screen.diskreader_window
+end
+
+function handlers.edit_label(event)
+    local player = game.get_player(event.player_index) --[[@as LuaPlayer]]
+    local reader = storage.opened_readers[player.index]
+    local refs = storage.refs[event.player_index]
+    local button = event.element
+    local textfield = refs.disk_label_textfield
+    local label = refs.disk_label
+    local was_editing = textfield.visible
+
+    if was_editing then
+        label.visible = true
+        textfield.visible = false
+        local new_label = textfield.text
+        reader.stack.set_tag("disk_label", new_label)
+        reader.stack.custom_description = new_label
+        if #new_label == 0 then
+            label.caption = {"diskreader-gui.label-no-label"}
+        else
+            label.caption = textfield.text
+        end
+        button.tooltip = {"gui-edit-label.edit-label"}
+    else
+        label.visible = false
+        textfield.visible = true
+        textfield.text = reader.stack.get_tag("disk_label") or ""
+        textfield.focus()
+        button.tooltip = {"gui-edit-label.save-label"}
+    end
 end
 
 function gui.on_tick()
