@@ -6,7 +6,7 @@ data.extend{
     name = "disk",
     icon = "__disk__/graphics/disk-512.png",
     icon_size = 32,
-    flags = { "not-stackable", "spawnable", "mod-openable"},
+    flags = { "not-stackable", "spawnable" },
     subgroup = "other",
     order = "s[item-with-tags]-o[item-with-tags]",
     stack_size = 1,
