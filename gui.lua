@@ -47,15 +47,6 @@ local function update_gui(player)
         refs.disk_label.caption = {"diskreader-gui.label-no-disk"}
     end
 
-    if chest_stack and chest_stack.valid_for_read then
-        local disk_label = chest_stack.get_tag("disk_label") or ""
-        if #disk_label == 0 then
-            refs.disk_label.caption = {"diskreader-gui.label-no-label"}
-        else
-            refs.disk_label.caption = disk_label
-        end
-    end
-
     -- fields in reader are already fresh because they ticked first before the gui update
     refs.read_signal.elem_value = reader.read_signal
     refs.write_signal.elem_value = reader.write_signal
@@ -227,10 +218,6 @@ function gui.open(reader, player)
                         style_mods = {vertical_align = "center"},
                         {
                             args = {type = "label", style = "subheader_semibold_label", name = "disk_label", caption = {"diskreader-gui.label-no-label"}},
-                        },
-                        {
-                            args = {type = "textfield", name = "disk_label_textfield", icon_selector = true, visible = false},
-                            _confirmed = handlers.edit_label
                         },
                         {
                             args = {type = "textfield", name = "disk_label_textfield", icon_selector = true, visible = false},
