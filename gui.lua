@@ -38,9 +38,11 @@ local function update_gui(player)
 
     local chest_stack = reader.stack
     if chest_stack and chest_stack.valid_for_read then
+        refs.disk_label_edit_button.visible = true
         refs.slot.sprite = "item."..chest_stack.name
         refs.disk_label.caption = chest_stack.label or {"diskreader-gui.label-no-label"}
     else
+        refs.disk_label_edit_button.visible = false
         refs.slot.sprite = nil
         refs.disk_label.caption = {"diskreader-gui.label-no-disk"}
     end
@@ -223,6 +225,7 @@ function gui.open(reader, player)
                     {
                         args = {type = "flow"},
                         style_mods = {vertical_align = "center"},
+                        style_mods = {vertical_align = "center"},
                         {
                             args = {type = "label", style = "subheader_semibold_label", name = "disk_label", caption = {"diskreader-gui.label-no-label"}},
                         },
@@ -231,7 +234,11 @@ function gui.open(reader, player)
                             _confirmed = handlers.edit_label
                         },
                         {
-                            args = {type = "sprite-button", style = "mini_button_aligned_to_text_vertically_when_centered", sprite = "utility.rename_icon", tooltip = {"gui-edit-label.edit-label"}},
+                            args = {type = "textfield", name = "disk_label_textfield", icon_selector = true, visible = false},
+                            _confirmed = handlers.edit_label
+                        },
+                        {
+                            args = {type = "sprite-button", name = "disk_label_edit_button", style = "mini_button_aligned_to_text_vertically_when_centered", sprite = "utility.rename_icon", tooltip = {"gui-edit-label.edit-label"}},
                             _click = handlers.edit_label
                         },
                     },
@@ -495,8 +502,7 @@ function handlers.edit_label(event)
         label.visible = true
         textfield.visible = false
         local new_label = textfield.text
-        reader.stack.set_tag("disk_label", new_label)
-        reader.stack.custom_description = new_label
+        reader.stack.label = textfield.text
         if #new_label == 0 then
             label.caption = {"diskreader-gui.label-no-label"}
         else
@@ -506,7 +512,7 @@ function handlers.edit_label(event)
     else
         label.visible = false
         textfield.visible = true
-        textfield.text = reader.stack.get_tag("disk_label") or ""
+        textfield.text = reader.stack.label or ""
         textfield.focus()
         button.tooltip = {"gui-edit-label.save-label"}
     end
