@@ -225,7 +225,6 @@ function gui.open(reader, player)
                     {
                         args = {type = "flow"},
                         style_mods = {vertical_align = "center"},
-                        style_mods = {vertical_align = "center"},
                         {
                             args = {type = "label", style = "subheader_semibold_label", name = "disk_label", caption = {"diskreader-gui.label-no-label"}},
                         },
