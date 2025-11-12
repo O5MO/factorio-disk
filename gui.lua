@@ -366,16 +366,26 @@ function handlers.slot_clicked(event)
     end
     local cursor_stack = player.cursor_stack
     if not cursor_stack then return end
-    if cursor_stack.valid_for_read and cursor_stack.name ~= "disk" then
-        player.create_local_flying_text{
-            text = {"diskreader-gui.cant-be-used-as-data-storage", player.cursor_stack.prototype.localised_name},
-            create_at_cursor = true,
+    if cursor_stack.valid_for_read then
+        if cursor_stack.name ~= "disk" then
+            player.create_local_flying_text{
+                text = {"diskreader-gui.cant-be-used-as-data-storage", player.cursor_stack.prototype.localised_name},
+                create_at_cursor = true,
+            }
+            player.play_sound{
+                path = "utility/cannot_build",
+                override_sound_type = "gui-effect",
+            }
+            return
+        end
+        player.play_sound{
+            path = "item-drop/disk",
         }
-        return
+    elseif stack.valid_for_read then
+        player.play_sound{
+            path = "item-pick/disk",
+        }
     end
-    player.play_sound{
-        path = "item-drop/disk",
-    }
     cursor_stack.swap_stack(stack)
 end
 
