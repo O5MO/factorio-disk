@@ -24,23 +24,21 @@ script.on_configuration_changed(function (change)
   }
 end)
 
+---@param collection {[integer?]:{ valid:(fun(self:self):boolean), (on_tick:fun(self:self)), (destroy:fun(self:self))  }}
+local function tick_or_cleanup(collection)
+  for unit_number, obj in pairs(collection) do
+    if obj:valid() then
+      obj:on_tick()
+    else
+      obj:destroy()
+      collection[unit_number] = nil
+    end
+  end
+end
+
 script.on_event(defines.events.on_tick, function()
-  for unit_number, reader in pairs(storage.readers) do
-    if reader:valid() then
-      reader:on_tick()
-    else
-      reader:destroy()
-      storage.readers[unit_number] = nil
-    end
-  end
-  for unit_number, reader in pairs(storage.ghost_readers) do
-    if reader:valid() then
-      reader:on_tick()
-    else
-      reader:destroy()
-      storage.ghost_readers[unit_number] = nil
-    end
-  end
+  tick_or_cleanup(storage.readers)
+  tick_or_cleanup(storage.ghost_readers)
   gui.on_tick()
 end)
 
@@ -125,11 +123,17 @@ do
     if not reader then return end
     if player.is_cursor_empty() then
       reader:take_disk(player)
+      player.play_sound{
+          path = "item-move/disk",
+      }
     else
       local cursor = player.cursor_stack
       if not (cursor and cursor.valid_for_read) then return end
       if cursor.name == "disk" then
         reader:put_disk(cursor)
+        player.play_sound{
+            path = "item-move/disk",
+        }
       end
     end
   end
